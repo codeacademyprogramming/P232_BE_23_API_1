@@ -1,4 +1,4 @@
-﻿namespace Api.Apps.AdminApi.Dtos
+﻿namespace Api.Apps.AdminApi.Dtos.BrandDtos
 {
     public class BrandGetAllItemDto
     {

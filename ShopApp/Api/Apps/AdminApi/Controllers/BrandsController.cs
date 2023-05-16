@@ -1,4 +1,5 @@
-﻿using Api.Apps.AdminApi.Dtos;
+﻿using Api.Apps.AdminApi.Dtos.BrandDtos;
+using AutoMapper;
 using Core.Entities;
 using Data;
 using Microsoft.AspNetCore.Http;
@@ -7,28 +8,28 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Api.Apps.AdminApi.Controllers
 {
+    [ApiExplorerSettings(GroupName = "admin_v1")]
     [Route("admin/api/[controller]")]
     [ApiController]
     public class BrandsController : ControllerBase
     {
         private readonly ShopDbContext _context;
+        private readonly IMapper _mapper;
 
-        public BrandsController(ShopDbContext context)
+        public BrandsController(ShopDbContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
+
 
         [HttpGet("")]
         public IActionResult GetAll()
         {
             var data = _context.Brands.ToList();
 
-            List<BrandGetAllItemDto> items = data.Select(x => new BrandGetAllItemDto
-            {
-                Id = x.Id,
-                Name = x.Name
-            }).ToList();
-
+            List<BrandGetAllItemDto> items = _mapper.Map<List<BrandGetAllItemDto>>(data);
+            
             return Ok(items);
         }
 
@@ -39,7 +40,7 @@ namespace Api.Apps.AdminApi.Controllers
 
             if (data == null) return NotFound();
 
-            BrandGetDto dto = new BrandGetDto { Id = data.Id,Name = data.Name,ProductCount=data.Products.Count };
+            BrandGetDto dto = _mapper.Map<BrandGetDto>(data);
 
             return Ok(dto);
         }
@@ -54,7 +55,7 @@ namespace Api.Apps.AdminApi.Controllers
                 return BadRequest(ModelState);
             }
 
-            Brand brand = new Brand { Name = brandDto.Name };
+            Brand brand = _mapper.Map<Brand>(brandDto);
 
             _context.Brands.Add(brand);
             _context.SaveChanges();

@@ -16,6 +16,8 @@ namespace Data.Configurations
             builder.Property(x => x.Name).HasMaxLength(50).IsRequired(true);
             builder.Property(x => x.SalePrice).HasColumnType("decimal(18,2)");
             builder.Property(x => x.CostPrice).HasColumnType("decimal(18,2)");
+            builder.Property(x => x.DiscountPercent).HasColumnType("decimal(18,2)");
+
         }
     }
 }
