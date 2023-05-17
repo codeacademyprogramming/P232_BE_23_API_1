@@ -1,6 +1,7 @@
 ﻿using Api.Apps.AdminApi.Dtos.BrandDtos;
 using AutoMapper;
 using Core.Entities;
+using Core.Repositories;
 using Data;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -13,30 +14,29 @@ namespace Api.Apps.AdminApi.Controllers
     [ApiController]
     public class BrandsController : ControllerBase
     {
-        private readonly ShopDbContext _context;
         private readonly IMapper _mapper;
+        private readonly IBrandRepository _brandRepository;
 
-        public BrandsController(ShopDbContext context, IMapper mapper)
+        public BrandsController( IMapper mapper, IBrandRepository brandRepository)
         {
-            _context = context;
             _mapper = mapper;
+            _brandRepository = brandRepository;
         }
 
 
         [HttpGet("")]
-        public IActionResult GetAll()
+        public async Task<IActionResult> GetAll()
         {
-            var data = _context.Brands.ToList();
+            var data = await _brandRepository.GetAllAsync();
 
             List<BrandGetAllItemDto> items = _mapper.Map<List<BrandGetAllItemDto>>(data);
-            
             return Ok(items);
         }
 
         [HttpGet("{id}")]
-        public IActionResult Get(int id)
+        public async Task<IActionResult> Get(int id)
         {
-            var data = _context.Brands.Include(x => x.Products).FirstOrDefault(x => x.Id == id);
+            var data = await _brandRepository.GetAsync(x=>x.Id == id,"Products","Orders");
 
             if (data == null) return NotFound();
 
@@ -47,9 +47,9 @@ namespace Api.Apps.AdminApi.Controllers
 
 
         [HttpPost("")]
-        public IActionResult Create(BrandDto brandDto)
+        public async Task<IActionResult> Create(BrandDto brandDto)
         {
-            if (_context.Brands.Any(x => x.Name == brandDto.Name))
+            if (await _brandRepository.IsExistAsync(x => x.Name == brandDto.Name))
             {
                 ModelState.AddModelError("Name", "brand already exist");
                 return BadRequest(ModelState);
@@ -57,41 +57,40 @@ namespace Api.Apps.AdminApi.Controllers
 
             Brand brand = _mapper.Map<Brand>(brandDto);
 
-            _context.Brands.Add(brand);
-            _context.SaveChanges();
+            await _brandRepository.AddAsync(brand);
+            await _brandRepository.SaveChangesAsync();
 
             return StatusCode(StatusCodes.Status201Created, brand);
         }
 
         [HttpPut("{id}")]
-        public IActionResult Update(int id,BrandDto brandDto)
+        public async Task<IActionResult> Update(int id,BrandDto brandDto)
         {
-            var existData = _context.Brands.Find(id);
+            var existData = await _brandRepository.GetAsync(x=>x.Id == id);
 
             if(existData == null) return NotFound();
 
-            if(existData.Name != brandDto.Name && _context.Brands.Any(x=>x.Name == brandDto.Name))
+            if(existData.Name != brandDto.Name && await _brandRepository.IsExistAsync(x=>x.Name == brandDto.Name))
             {
                 ModelState.AddModelError("Name", "brand already exist");
                 return BadRequest(ModelState);
             }
 
             existData.Name = brandDto.Name;
-            _context.SaveChanges();
+            await _brandRepository.SaveChangesAsync();
 
             return NoContent();
         }
 
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            var data = _context.Brands.Find(id);
+            var data = await _brandRepository.GetAsync(x=>x.Id == id);
 
             if (data == null) return NotFound();
 
-            _context.Brands.Remove(data);
-
-            _context.SaveChanges();
+            _brandRepository.Remove(data);
+            await _brandRepository.SaveChangesAsync();
 
             return NoContent();
         }

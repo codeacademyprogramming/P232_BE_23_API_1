@@ -12,12 +12,14 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.OpenApi.Models;
 using Api.Services;
+using Core.Repositories;
+using Data.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddNewtonsoftJson(x => x.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 
 builder.Services.AddDbContext<ShopDbContext>(opt =>
 {
@@ -25,6 +27,9 @@ builder.Services.AddDbContext<ShopDbContext>(opt =>
 });
 
 builder.Services.AddScoped<JwtService>();
+builder.Services.AddScoped<IBrandRepository, BrandRepository>();
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+
 
 builder.Services.AddIdentity<AppUser, IdentityRole>(opt =>
 {

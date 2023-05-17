@@ -1,6 +1,7 @@
 ﻿using Api.Apps.AdminApi.Dtos.ProductDtos;
 using AutoMapper;
 using Core.Entities;
+using Core.Repositories;
 using Data;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -12,27 +13,29 @@ namespace Api.Apps.AdminApi.Controllers
     [ApiController]
     public class ProductsController : ControllerBase
     {
-        private readonly ShopDbContext _context;
+        private readonly IProductRepository _productRepository;
+        private readonly IBrandRepository _brandRepository;
         private readonly IMapper _mapper;
 
-        public ProductsController(ShopDbContext context, IMapper mapper)
+        public ProductsController(IProductRepository productRepository,IBrandRepository brandRepository, IMapper mapper)
         {
-            _context = context;
+            _productRepository = productRepository;
+            _brandRepository = brandRepository;
             _mapper = mapper;
         }
 
         [HttpGet("")]
-        public IActionResult GetAll()
+        public async Task<IActionResult> GetAll()
         {
-            var data = _context.Products.ToList();
+            var data = await _productRepository.GetAllAsync("Brand");
 
             return Ok(data);
         }
 
         [HttpGet("{id}")]
-        public IActionResult Get(int id)
+        public async Task<IActionResult> Get(int id)
         {
-            var data = _context.Products.Find(id);
+            var data = await _productRepository.GetAsync(x => x.Id == id,"Brand");
 
             if (data == null) return NotFound();
 
@@ -40,9 +43,9 @@ namespace Api.Apps.AdminApi.Controllers
         }
 
         [HttpPost("")]
-        public IActionResult Create(ProductDto dto)
+        public async Task<IActionResult> Create(ProductDto dto)
         {
-            if (!_context.Brands.Any(x => x.Id == dto.BrandId))
+            if (! await _brandRepository.IsExistAsync(x=>x.Id == dto.BrandId))
             {
                 ModelState.AddModelError("BrandId", "BrandId is not correct");
                 return BadRequest(ModelState);
@@ -50,20 +53,20 @@ namespace Api.Apps.AdminApi.Controllers
 
             Product product = _mapper.Map<Product>(dto);
 
-            _context.Products.Add(product);
-            _context.SaveChanges();
+            await _productRepository.AddAsync(product);
+            await _productRepository.SaveChangesAsync();
 
             return StatusCode(201, product);
         }
 
         [HttpPut("{id}")]
-        public IActionResult Edit(int id,ProductDto dto)
+        public async Task<IActionResult> Edit(int id,ProductDto dto)
         {
-            var existData = _context.Products.Find(id);
+            var existData = await _productRepository.GetAsync(x => x.Id == id);
 
             if (existData == null) return NotFound();
 
-            if(existData.BrandId!=dto.BrandId && !_context.Brands.Any(x=>x.Id == dto.BrandId))
+            if(existData.BrandId!=dto.BrandId && ! await _brandRepository.IsExistAsync(x=>x.Id == dto.BrandId))
             {
                 ModelState.AddModelError("BrandId", "BrandId is not correct");
                 return BadRequest(ModelState);
@@ -75,7 +78,7 @@ namespace Api.Apps.AdminApi.Controllers
             existData.SalePrice = dto.SalePrice;
             existData.DiscountPercent = dto.DiscountPercent;
 
-            _context.SaveChanges();
+            await _productRepository.SaveChangesAsync();
 
             return NoContent();
         }
