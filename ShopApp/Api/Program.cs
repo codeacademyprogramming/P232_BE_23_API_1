@@ -2,7 +2,6 @@ using Data;
 using FluentValidation.AspNetCore;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using Api.Apps.AdminApi.Dtos.BrandDtos;
 using Swashbuckle.AspNetCore.Swagger;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 using Api.Profiles;
@@ -14,6 +13,11 @@ using Microsoft.OpenApi.Models;
 using Api.Services;
 using Core.Repositories;
 using Data.Repositories;
+using Service.Dtos.BrandDtos;
+using Service.Interfaces;
+using Service.Implementation;
+using Microsoft.AspNetCore.Diagnostics;
+using Api.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,6 +33,8 @@ builder.Services.AddDbContext<ShopDbContext>(opt =>
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<IBrandRepository, BrandRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IBrandService, BrandService>();
+
 
 
 builder.Services.AddIdentity<AppUser, IdentityRole>(opt =>
@@ -118,6 +124,10 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
+
 app.MapControllers();
 
+
 app.Run();
+

@@ -1,14 +1,18 @@
-﻿using Api.Apps.AdminApi.Dtos.BrandDtos;
-using AutoMapper;
+﻿using AutoMapper;
 using Core.Entities;
 using Core.Repositories;
 using Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Service.Dtos.BrandDtos;
+using Service.Exceptions;
+using Service.Interfaces;
 
 namespace Api.Apps.AdminApi.Controllers
 {
+    [Authorize(Roles = "Admin,SuperAdmin")]
     [ApiExplorerSettings(GroupName = "admin_v1")]
     [Route("admin/api/[controller]")]
     [ApiController]
@@ -16,83 +20,47 @@ namespace Api.Apps.AdminApi.Controllers
     {
         private readonly IMapper _mapper;
         private readonly IBrandRepository _brandRepository;
+        private readonly IBrandService _brandService;
 
-        public BrandsController( IMapper mapper, IBrandRepository brandRepository)
+        public BrandsController(IBrandService brandService)
         {
-            _mapper = mapper;
-            _brandRepository = brandRepository;
+            _brandService = brandService;
         }
 
 
         [HttpGet("")]
         public async Task<IActionResult> GetAll()
         {
-            var data = await _brandRepository.GetAllAsync();
-
-            List<BrandGetAllItemDto> items = _mapper.Map<List<BrandGetAllItemDto>>(data);
-            return Ok(items);
+            return Ok(await _brandService.GetAllAsync());
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
         {
-            var data = await _brandRepository.GetAsync(x=>x.Id == id,"Products","Orders");
-
-            if (data == null) return NotFound();
-
-            BrandGetDto dto = _mapper.Map<BrandGetDto>(data);
-
-            return Ok(dto);
+            return Ok(await _brandService.GetById(id));
         }
 
 
         [HttpPost("")]
         public async Task<IActionResult> Create(BrandDto brandDto)
         {
-            if (await _brandRepository.IsExistAsync(x => x.Name == brandDto.Name))
-            {
-                ModelState.AddModelError("Name", "brand already exist");
-                return BadRequest(ModelState);
-            }
-
-            Brand brand = _mapper.Map<Brand>(brandDto);
-
-            await _brandRepository.AddAsync(brand);
-            await _brandRepository.SaveChangesAsync();
-
-            return StatusCode(StatusCodes.Status201Created, brand);
+            var data = await _brandService.CreateAsync(brandDto);
+            return StatusCode(StatusCodes.Status201Created, data);
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id,BrandDto brandDto)
         {
-            var existData = await _brandRepository.GetAsync(x=>x.Id == id);
-
-            if(existData == null) return NotFound();
-
-            if(existData.Name != brandDto.Name && await _brandRepository.IsExistAsync(x=>x.Name == brandDto.Name))
-            {
-                ModelState.AddModelError("Name", "brand already exist");
-                return BadRequest(ModelState);
-            }
-
-            existData.Name = brandDto.Name;
-            await _brandRepository.SaveChangesAsync();
-
+            await _brandService.UpdateAsync(id, brandDto);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var data = await _brandRepository.GetAsync(x=>x.Id == id);
-
-            if (data == null) return NotFound();
-
-            _brandRepository.Remove(data);
-            await _brandRepository.SaveChangesAsync();
-
+            await _brandService.DeleteAsync(id);
             return NoContent();
         }
+
     }
 }

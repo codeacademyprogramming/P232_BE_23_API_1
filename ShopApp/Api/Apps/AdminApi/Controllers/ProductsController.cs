@@ -1,10 +1,10 @@
-﻿using Api.Apps.AdminApi.Dtos.ProductDtos;
-using AutoMapper;
+﻿using AutoMapper;
 using Core.Entities;
 using Core.Repositories;
 using Data;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Service.Dtos.ProductDtos;
 
 namespace Api.Apps.AdminApi.Controllers
 {

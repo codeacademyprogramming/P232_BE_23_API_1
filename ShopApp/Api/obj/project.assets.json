@@ -1168,6 +1168,21 @@
         "runtime": {
           "bin/placeholder/Data.dll": {}
         }
+      },
+      "Service/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v7.0",
+        "dependencies": {
+          "AutoMapper.Extensions.Microsoft.DependencyInjection": "12.0.1",
+          "Data": "1.0.0",
+          "FluentValidation.AspNetCore": "11.3.0"
+        },
+        "compile": {
+          "bin/placeholder/Service.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/Service.dll": {}
+        }
       }
     }
   },
@@ -3017,18 +3032,23 @@
       "type": "project",
       "path": "../Data/Data.csproj",
       "msbuildProject": "../Data/Data.csproj"
+    },
+    "Service/1.0.0": {
+      "type": "project",
+      "path": "../Service/Service.csproj",
+      "msbuildProject": "../Service/Service.csproj"
     }
   },
   "projectFileDependencyGroups": {
     "net7.0": [
       "AutoMapper.Extensions.Microsoft.DependencyInjection >= 12.0.1",
-      "Data >= 1.0.0",
       "FluentValidation.AspNetCore >= 11.3.0",
       "MicroElements.Swashbuckle.FluentValidation >= 5.7.0",
       "Microsoft.AspNetCore.Authentication.JwtBearer >= 6.0.16",
       "Microsoft.AspNetCore.Mvc.NewtonsoftJson >= 6.0.16",
       "Microsoft.AspNetCore.OpenApi >= 7.0.2",
       "Microsoft.EntityFrameworkCore.Design >= 6.0.16",
+      "Service >= 1.0.0",
       "Swashbuckle.AspNetCore >= 6.4.0"
     ]
   },
@@ -3059,8 +3079,8 @@
         "net7.0": {
           "targetAlias": "net7.0",
           "projectReferences": {
-            "C:\\Users\\Eagha\\Desktop\\CodeLessons\\P232\\Backend\\API\\P232_BE_API\\ShopApp\\Data\\Data.csproj": {
-              "projectPath": "C:\\Users\\Eagha\\Desktop\\CodeLessons\\P232\\Backend\\API\\P232_BE_API\\ShopApp\\Data\\Data.csproj"
+            "C:\\Users\\Eagha\\Desktop\\CodeLessons\\P232\\Backend\\API\\P232_BE_API\\ShopApp\\Service\\Service.csproj": {
+              "projectPath": "C:\\Users\\Eagha\\Desktop\\CodeLessons\\P232\\Backend\\API\\P232_BE_API\\ShopApp\\Service\\Service.csproj"
             }
           }
         }
