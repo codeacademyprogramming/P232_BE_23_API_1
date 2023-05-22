@@ -10,26 +10,33 @@ namespace AdminUI.Controllers
 {
     public class BrandController : Controller
     {
+        private HttpClient _client;
+        private readonly IConfiguration _configuration;
+
+        public BrandController(IConfiguration configuration)
+        {
+            _configuration = configuration;
+            _client = new HttpClient();
+
+           
+        }
         public async Task<IActionResult> Index()
         {
+            string token = "Bearer "+ Request.Cookies["token"];
+            if (token != null) _client.DefaultRequestHeaders.Add(HeaderNames.Authorization, token);
             List<BrandItemViewModel> data = new List<BrandItemViewModel>();
-            using(HttpClient client = new HttpClient())
+            using (var response = await _client.GetAsync("https://localhost:7137/admin/api/Brands"))
             {
-                client.DefaultRequestHeaders.Add(HeaderNames.Authorization, "Bearer " + Request.Cookies["token"]);
-                using(var response = await client.GetAsync("https://localhost:7137/admin/api/Brands"))
+                if (response.StatusCode == System.Net.HttpStatusCode.OK)
                 {
-                    if (response.IsSuccessStatusCode)
-                    {
-                        string responseStr = await response.Content.ReadAsStringAsync();
-                        data = JsonConvert.DeserializeObject<List<BrandItemViewModel>>(responseStr);
-                    }
-                    else
-                    {
-                        return RedirectToAction("error", "home");
-                    }
-                   
+                    string responseStr = await response.Content.ReadAsStringAsync();
+                    data = JsonConvert.DeserializeObject<List<BrandItemViewModel>>(responseStr);
                 }
-            } 
+                else if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized || response.StatusCode == System.Net.HttpStatusCode.Forbidden)
+                    return RedirectToAction("login", "account");
+                else
+                    return RedirectToAction("error", "home");
+            }
             return View(data);
         }
 
@@ -41,17 +48,25 @@ namespace AdminUI.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(BrandCreateViewModel brand)
         {
-            using(HttpClient client = new HttpClient())
+            if (!ModelState.IsValid) return View();
+
+            string token = "Bearer " + Request.Cookies["token"];
+            if (token != null) _client.DefaultRequestHeaders.Add(HeaderNames.Authorization, token);
+            StringContent content = new StringContent(JsonConvert.SerializeObject(brand), Encoding.UTF8, "application/json");
+            using (var response = await _client.PostAsync("https://localhost:7137/admin/api/Brands", content))
             {
-                client.DefaultRequestHeaders.Add(HeaderNames.Authorization, "Bearer " + Request.Cookies["token"]);
-                StringContent content = new StringContent(JsonConvert.SerializeObject(brand), Encoding.UTF8, "application/json");
-                using(var response = await client.PostAsync("https://localhost:7137/admin/api/Brands",content))
+                if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
                 {
-                    if(response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+                    var resContent = await response.Content.ReadAsStringAsync();
+                    ErrorReponseViewModel err = JsonConvert.DeserializeObject<ErrorReponseViewModel>(resContent);
+
+                    if (err.Errors != null)
                     {
-                        ModelState.AddModelError("Name", "Name already taken");
-                        return View();
+                        foreach (var item in err.Errors)
+                            ModelState.AddModelError(item.Key, item.Message);
                     }
+
+                    return View();
                 }
             }
 
@@ -60,41 +75,44 @@ namespace AdminUI.Controllers
 
         public async Task<IActionResult> Edit(int id)
         {
+            string token = "Bearer " + Request.Cookies["token"];
+            if (token != null) _client.DefaultRequestHeaders.Add(HeaderNames.Authorization, token);
             BrandEditViewModel data = new BrandEditViewModel();
-            using (HttpClient client = new HttpClient())
+            using (var response = await _client.GetAsync("https://localhost:7137/admin/api/Brands/" + id))
             {
-                client.DefaultRequestHeaders.Add(HeaderNames.Authorization, "Bearer " + Request.Cookies["token"]);
-                using (var response = await client.GetAsync("https://localhost:7137/admin/api/Brands/"+id))
-                {
-                    if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
-                        return RedirectToAction("error", "home");
+                if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                    return RedirectToAction("error", "home");
 
-                    string responseStr = await response.Content.ReadAsStringAsync();
-                    data = JsonConvert.DeserializeObject<BrandEditViewModel>(responseStr);
-                }
+                string responseStr = await response.Content.ReadAsStringAsync();
+                data = JsonConvert.DeserializeObject<BrandEditViewModel>(responseStr);
             }
 
             return View(data);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Edit(int id,BrandEditViewModel brand)
+        public async Task<IActionResult> Edit(int id, BrandEditViewModel brand)
         {
-            using (HttpClient client = new HttpClient())
+            string token = "Bearer " + Request.Cookies["token"];
+            if (token != null) _client.DefaultRequestHeaders.Add(HeaderNames.Authorization, token);
+            StringContent content = new StringContent(JsonConvert.SerializeObject(brand), Encoding.UTF8, "application/json");
+            using (var response = await _client.PutAsync("https://localhost:7137/admin/api/Brands/" + id, content))
             {
-                client.DefaultRequestHeaders.Add(HeaderNames.Authorization, "Bearer " + Request.Cookies["token"]);
-                StringContent content = new StringContent(JsonConvert.SerializeObject(brand), Encoding.UTF8, "application/json");
-                using (var response = await client.PutAsync("https://localhost:7137/admin/api/Brands/"+id, content))
+                if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
                 {
-                    if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+                    var resContent = await response.Content.ReadAsStringAsync();
+                    ErrorReponseViewModel err = JsonConvert.DeserializeObject<ErrorReponseViewModel>(resContent);
+
+                    if (err.Errors != null)
                     {
-                        ModelState.AddModelError("Name", "Name already taken");
-                        return View();
+                        foreach (var item in err.Errors)
+                            ModelState.AddModelError(item.Key, item.Message);
                     }
-                    else if(response.StatusCode == System.Net.HttpStatusCode.NotFound)
-                    {
-                        return RedirectToAction("error", "home");
-                    }
+                    return View();
+                }
+                else if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    return RedirectToAction("error", "home");
                 }
             }
 

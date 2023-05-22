@@ -26,8 +26,8 @@ namespace Service.Implementation
         }
         public async Task<BrandCreateResponseDto> CreateAsync(BrandDto brandDto)
         {
-            if(await _brandRepository.IsExistAsync(x=>x.Name == brandDto.Name))
-                throw new EntityDublicateException("Name already taken");
+            if (await _brandRepository.IsExistAsync(x => x.Name == brandDto.Name))
+                throw new RestException(System.Net.HttpStatusCode.BadRequest, "Name", "Name already taken");
 
             Brand brand = _mapper.Map<Brand>(brandDto);
 
@@ -42,7 +42,7 @@ namespace Service.Implementation
             Brand brand = await _brandRepository.GetAsync(x => x.Id == id);
 
             if (brand == null)
-                throw new NotFoundException("Item not found");
+                throw new RestException(System.Net.HttpStatusCode.NotFound,$"Item not found by id: {id}");
 
             _brandRepository.Remove(brand);
             await _brandRepository.SaveChangesAsync();
@@ -61,7 +61,7 @@ namespace Service.Implementation
         {
             var data = await _brandRepository.GetAsync(x => x.Id == id, "Products");
 
-            if (data == null) throw new NotFoundException("Item not found");
+            if (data == null) throw new RestException(System.Net.HttpStatusCode.NotFound, $"Item not found by id: {id}");
 
             BrandGetDto dto = _mapper.Map<BrandGetDto>(data);
 
@@ -72,10 +72,10 @@ namespace Service.Implementation
         {
             var existData = await _brandRepository.GetAsync(x => x.Id == id);
 
-            if (existData == null) throw new NotFoundException("Item not found");
+            if (existData == null) throw new RestException(System.Net.HttpStatusCode.NotFound, $"Item not found by id: {id}");
 
             if (existData.Name != brandDto.Name && await _brandRepository.IsExistAsync(x => x.Name == brandDto.Name))
-                throw new EntityDublicateException("Name already taken"); 
+                throw new RestException(System.Net.HttpStatusCode.BadRequest,"Name", $"Name already taken");
 
             existData.Name = brandDto.Name;
             await _brandRepository.SaveChangesAsync();

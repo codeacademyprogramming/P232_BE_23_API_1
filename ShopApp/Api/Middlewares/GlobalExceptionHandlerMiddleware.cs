@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using Api.Common;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using Service.Exceptions;
 using System.Net;
 
@@ -22,23 +24,28 @@ namespace Api.Middlewares
             }
             catch (Exception error)
             {
+                var responseModel = new ErrorResponseModel();
                 var response = context.Response;
                 response.ContentType = "application/json";
 
                 switch (error)
                 {
-                    case NotFoundException exp:
-                        response.StatusCode = 404;
-                        break;
-                    case EntityDublicateException exp:
-                        response.StatusCode = 400;
+                    case RestException exp:
+                        response.StatusCode = (int)exp.Code;
+                        responseModel.Errors = exp.Errors;
+                        responseModel.Message = exp.Message;
                         break;
                     default:
                         response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                        responseModel.Message = error.Message;
                         break;
                 }
 
-                var result = JsonConvert.SerializeObject(new { message = error.Message });
+                var result = JsonConvert.SerializeObject(responseModel, new JsonSerializerSettings
+                {
+                    Formatting = Formatting.Indented,
+                    ContractResolver = new DefaultContractResolver { NamingStrategy = new CamelCaseNamingStrategy() }
+                });
                 await response.WriteAsync(result);
             }
         }

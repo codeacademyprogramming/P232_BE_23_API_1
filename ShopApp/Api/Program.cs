@@ -18,12 +18,30 @@ using Service.Interfaces;
 using Service.Implementation;
 using Microsoft.AspNetCore.Diagnostics;
 using Api.Middlewares;
+using Microsoft.AspNetCore.Mvc;
+using Api.Common;
+using Service.Exceptions;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers().AddNewtonsoftJson(x => x.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
+builder.Services.AddControllers()
+    .AddJsonOptions(jsonOptions =>
+    {
+        jsonOptions.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+    })
+    .AddNewtonsoftJson(x => x.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore)
+    .ConfigureApiBehaviorOptions(opt =>
+    {
+        opt.InvalidModelStateResponseFactory = context =>
+        {
+            var errors = context.ModelState.Where(x => x.Value.Errors.Count > 0)
+            .Select(x => new ModelError(x.Key, x.Value.Errors.First().ErrorMessage)).ToList();
+
+            return new BadRequestObjectResult(new ErrorResponseModel { Errors = errors});
+        };
+    });
 
 builder.Services.AddDbContext<ShopDbContext>(opt =>
 {
@@ -34,6 +52,8 @@ builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<IBrandRepository, BrandRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IBrandService, BrandService>();
+builder.Services.AddScoped<IProductService, ProductService>();
+
 
 
 

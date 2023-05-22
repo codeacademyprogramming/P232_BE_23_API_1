@@ -16,10 +16,11 @@ namespace Service.Dtos.ProductDtos
         public ProductDtoValidator()
         {
             RuleFor(x => x.Name).NotEmpty().MaximumLength(30).MinimumLength(2);
-            RuleFor(x => x.SalePrice).GreaterThanOrEqualTo(0);
-            RuleFor(x => x.CostPrice).GreaterThanOrEqualTo(0);
-            RuleFor(x => x.DiscountPercent).GreaterThanOrEqualTo(0).LessThanOrEqualTo(100);
-            RuleFor(x => x.CostPrice).LessThanOrEqualTo(x => x.SalePrice);
+            RuleFor(x => x.SalePrice).NotNull().GreaterThanOrEqualTo(0);
+            RuleFor(x => x.DiscountPercent).NotNull().GreaterThanOrEqualTo(0).LessThanOrEqualTo(100);
+            RuleFor(x => x.CostPrice).NotNull().LessThanOrEqualTo(x => x.SalePrice).GreaterThanOrEqualTo(0);
+            RuleFor(x => x.BrandId).NotEmpty();
+
 
             RuleFor(x => x).Custom((x, context) =>
             {

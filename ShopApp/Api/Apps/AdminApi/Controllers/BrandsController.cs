@@ -61,6 +61,5 @@ namespace Api.Apps.AdminApi.Controllers
             await _brandService.DeleteAsync(id);
             return NoContent();
         }
-
     }
 }

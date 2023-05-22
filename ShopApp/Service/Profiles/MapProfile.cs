@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Core.Entities;
 using Service.Dtos.BrandDtos;
+using Service.Dtos.ProductDtos;
 
 namespace Api.Profiles
 {
@@ -14,6 +15,10 @@ namespace Api.Profiles
 
             CreateMap<BrandDto, Brand>();
             CreateMap<Brand, BrandCreateResponseDto>();
+
+            CreateMap<ProductDto, Product>();
+
+            CreateMap<Product, ProductGetAllItemDto>();
         }
     }
 }
