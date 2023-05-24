@@ -39,7 +39,7 @@ namespace Api.Apps.AdminApi.Controllers
         }
 
         [HttpPost("")]
-        public async Task<IActionResult> Create(ProductDto dto)
+        public async Task<IActionResult> Create([FromForm] ProductDto dto)
         {
             var response = await _productService.CreteAsync(dto);
 

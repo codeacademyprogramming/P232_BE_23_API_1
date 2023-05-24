@@ -82,3 +82,4 @@ C:\Users\Eagha\Desktop\CodeLessons\P232\Backend\API\P232_BE_API\ShopApp\api\obj\
 C:\Users\Eagha\Desktop\CodeLessons\P232\Backend\API\P232_BE_API\ShopApp\api\obj\Debug\net7.0\Api.pdb
 C:\Users\Eagha\Desktop\CodeLessons\P232\Backend\API\P232_BE_API\ShopApp\api\obj\Debug\net7.0\Api.genruntimeconfig.cache
 C:\Users\Eagha\Desktop\CodeLessons\P232\Backend\API\P232_BE_API\ShopApp\api\obj\Debug\net7.0\ref\Api.dll
+C:\Users\Eagha\Desktop\CodeLessons\P232\Backend\API\P232_BE_API\ShopApp\api\bin\Debug\net7.0\Api.staticwebassets.runtime.json

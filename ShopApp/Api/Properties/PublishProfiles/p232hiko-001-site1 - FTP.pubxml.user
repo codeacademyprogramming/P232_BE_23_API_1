@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+This file is used by the publish/package process of your Web project. You can customize the behavior of this process
+by editing this MSBuild file. In order to learn more about this please visit https://go.microsoft.com/fwlink/?LinkID=208121. 
+-->
+<Project>
+  <PropertyGroup>
+    <TimeStampOfAssociatedLegacyPublishXmlFile />
+    <EncryptedPassword>AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAA2+iQ4ctGKku/+zbYD8tDngAAAAACAAAAAAAQZgAAAAEAACAAAAA3hw32QIlW0GoNXuo7ya+CsqPZthV11heurxz4ZV4N0wAAAAAOgAAAAAIAACAAAABJr1cn/UjKA25Nmm6uMQs92DXMmR4ZwhL1aPwzCOVI9CAAAACkE18n8sK/KuV5ta9zLcpVY+K9/2NqTHBOvtR9z1ypgEAAAACCjFzZAupmZB65i3ZLmrXfTc0R41wKg0e2sOSz8fDRnqZv/ZcFh4yCeGUcN7ATbdwKdiJT+I1xB4p2s3+CRSh6</EncryptedPassword>
+  </PropertyGroup>
+  <ItemGroup>
+    <DestinationConnectionStrings Include="Default">
+      <Value>Server=SQL5110.site4now.net%3bDatabase=db_a99ca0_p232shopdb%3buser id=db_a99ca0_p232shopdb_admin%3bpassword=hiko%40123</Value>
+    </DestinationConnectionStrings>
+  </ItemGroup>
+</Project>

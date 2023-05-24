@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using Microsoft.AspNetCore.Http;
 
 namespace Service.Dtos.ProductDtos
 {
@@ -9,6 +10,7 @@ namespace Service.Dtos.ProductDtos
         public decimal SalePrice { get; set; }
         public decimal CostPrice { get; set; }
         public decimal DiscountPercent { get; set; }
+        public IFormFile File { get; set; }
     }
 
     public class ProductDtoValidator : AbstractValidator<ProductDto>

@@ -4,6 +4,7 @@ using Core.Repositories;
 using Service.Dtos.Common;
 using Service.Dtos.ProductDtos;
 using Service.Exceptions;
+using Service.Helpers;
 using Service.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -34,6 +35,11 @@ namespace Service.Implementation
                 throw new RestException(System.Net.HttpStatusCode.BadRequest, "BrandId", "BrandId is not correct");
 
             Product product = _mapper.Map<Product>(productDto);
+
+            string path = Path.Combine(Directory.GetCurrentDirectory() + "/wwwroot/uploads");
+            product.ImageName = FileManager.Save(productDto.File, Directory.GetCurrentDirectory() + "/wwwroot","uploads");
+            product.ImageUrl = path + "/" + product.ImageName;
+
 
             await _productRepository.AddAsync(product);
             await _productRepository.SaveChangesAsync();
